@@ -76,8 +76,8 @@ export default class DynamicPageCreateAndAddWebPartApplicationCustomizer
         console.log("Response returned");
         if (response.ok) {
           return response.json()
-
-
+          //to make another call for next azure method on success of 1st method
+          
         }
         else
         {
