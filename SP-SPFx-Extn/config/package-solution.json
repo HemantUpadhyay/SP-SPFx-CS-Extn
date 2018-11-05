@@ -5,6 +5,16 @@
     "id": "4a86291e-8a4d-4526-81f6-25f6497a3bbe",
     "version": "1.0.0.0",
     "includeClientSideAssets": true,
+    "webApiPermissionRequests": [
+      {
+        "resource": "User Details Custom API for SPFx",
+        "scope": "user_impersonation"
+      },
+      {
+        "resource": "Windows Azure Active Directory",
+        "scope": "User.Read"
+      }
+    ],
     "features": [
       {
         "title": "Application Extension - Deployment of custom action.",
