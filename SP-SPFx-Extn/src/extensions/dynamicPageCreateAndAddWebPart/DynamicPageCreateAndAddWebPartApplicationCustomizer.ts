@@ -39,26 +39,15 @@ export default class DynamicPageCreateAndAddWebPartApplicationCustomizer
   }
 
   @override
-  public onRender(): void{
-      
+  public onRender(): void{      
   }
 
   private async getNewPageStatus() {
-    // this.context.aadHttpClientFactory
-    //   .getClient('https://tenant.onmicrosoft.com/6b347c27-f360-47ac-b4d4-af78d0da4223')
-    //   .then((client: AadHttpClient): void => {
-    //     client
-    //       .get('https://myfunction.azurewebsites.net/api/CurrentUser', AadHttpClient.configurations.v1)
-    //       .then((response: HttpClientResponse): Promise<JSON> => {
-    //         return response.json();
-    //       })          
-    //   });
-
     const currentWebUrl: string = this.context.pageContext.web.absoluteUrl;
     //const pageName = 'DynamicPage.aspx'
-    var functionUrl : string = "https://[functionName].azurewebsites.net/api/[FunctionMethod1]";
+    var functionSIteIDUrl : string = "https://functesthelloworld.azurewebsites.net/api/HttpTrigger1?code=zWFUcRwMIeXtUaCCYP8BOWYFa5jQn5SAE9/hHqFL/6Uk/mfavUhw0Q==&name=Hemant";
 
-    var functionPageCreation : string = "https://[functionName].azurewebservices.net/api/[FunctionMethod2]";
+    var functionInsertWebPartUrl : string = "https://functesthelloworld.azurewebsites.net/api/HttpTrigger1?code=zWFUcRwMIeXtUaCCYP8BOWYFa5jQn5SAE9/hHqFL/6Uk/mfavUhw0Q==&name=Hemant";
     const requestHeaders: Headers = new Headers();
     requestHeaders.append("Content-type", "application/json");
     requestHeaders.append("Cache-Control", "private"); 
@@ -69,15 +58,21 @@ export default class DynamicPageCreateAndAddWebPartApplicationCustomizer
     body: `{\r\n    siteURL: '${currentWebUrl}'\r\n}`,
     method: "POST"
     };
+
+    const getOption : RequestInit = {
+    headers: requestHeaders,
+    //body: `{\r\n    siteURL: '${currentWebUrl}',\r\n    pageName: '${pageName}' \r\n}`,
+    body: `{\r\n    siteURL: '${currentWebUrl}'\r\n}`,
+    method: "GET"
+    };
+
     let responseText: string = "";
     let createPageStatus: string = "";
     console.log("Wait started for Creating page");
-    await fetch(functionUrl, postOptions).then((response) => {
+    await fetch(functionSIteIDUrl, postOptions).then((response) => {
         console.log("Response returned");
         if (response.ok) {
-          return response.json()
-          //to make another call for next azure method on success of 1st method
-          
+          return response.json()          
         }
         else
         {
@@ -90,6 +85,8 @@ export default class DynamicPageCreateAndAddWebPartApplicationCustomizer
         if(responseText.toLowerCase().indexOf("success") > 0)
             {
               console.log("success feedback");
+              //to make another call for next azure method on success of 1st method
+              this.insertWebPartToPage();
             }
         if(responseText.toLowerCase().indexOf("error") > 0)
             {
@@ -97,12 +94,60 @@ export default class DynamicPageCreateAndAddWebPartApplicationCustomizer
             }
       }
     ).catch ((response: any) => {
-      let errMsg: string = `WARNING - error when calling URL ${functionUrl}. Error = ${response.message}`;
+      let errMsg: string = `WARNING - error when calling URL ${functionSIteIDUrl}. Error = ${response.message}`;
       console.log(errMsg);
     });
     console.log("wait finished");
   }
 
+  private async insertWebPartToPage()
+  {
+    const currentWebUrl: string = this.context.pageContext.web.absoluteUrl;
+    //const pageName = 'DynamicPage.aspx'    
+    var functionInsertWebPartUrl : string = "https://[functionName].azurewebservices.net/api/[FunctionMethod2]";
+    const requestHeaders: Headers = new Headers();
+    requestHeaders.append("Content-type", "application/json");
+    requestHeaders.append("Cache-Control", "private"); 
+
+    const getOption : RequestInit = {
+    headers: requestHeaders,
+    //body: `{\r\n    siteURL: '${currentWebUrl}',\r\n    pageName: '${pageName}' \r\n}`,
+    body: `{\r\n    siteURL: '${currentWebUrl}'\r\n}`,
+    method: "GET"
+    };
+
+    let responseText: string = "";
+    let createPageStatus: string = "";
+    console.log("Wait started for adding Web Part");
+    await fetch(functionInsertWebPartUrl, getOption).then((response) => {
+        console.log("Response returned");
+        if (response.ok) {
+          return response.json()
+        }
+        else
+        {
+            var errMsg = "Error detected while adding web-part to site page. Server response wasn't OK ";
+            console.log(errMsg);
+        } 
+      }).then((responseJSON: JSON) => {
+        responseText = JSON.stringify(responseJSON).trim();
+        console.log(responseText);
+        if(responseText.toLowerCase().indexOf("success") > 0)
+            {
+              console.log("Web-part add success");
+            }
+        if(responseText.toLowerCase().indexOf("error") > 0)
+            {
+              console.log("web call errored");
+            }
+      }
+    ).catch ((response: any) => {
+      let errMsg: string = `WARNING - error when calling URL ${functionInsertWebPartUrl}. Error = ${response.message}`;
+      console.log(errMsg);
+    });
+    console.log("wait for web Part add finished");
+  }
+  
   private async Initiate() {
     await this.getNewPageStatus();
   }
